@@ -56,7 +56,10 @@ class DetectorTester:
 
     def retina_detect(self, img):
         out = []
-        for face in RetinaFace.detect_faces(img).values():
+        faces = RetinaFace.detect_faces(img)
+        if isinstance(faces, tuple):
+            return out
+        for face in faces.values():
             out.append(face['facial_area'])
         return out
 
@@ -105,7 +108,7 @@ class DetectorTester:
             faces, t = self.detect(img, detector)
             total_t += t
             for (x, y, w, h) in faces:
-                if detector in ['yolo', 'retina-face', 'ultraface']:
+                if detector in ['yolo', 'retina', 'ultraface']:
                     cv2.rectangle(img, (x, y), (w, h), (0, 255, 0), 2)
                 else:
                     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -145,10 +148,8 @@ class DetectorTester:
             file.write(stat_time)
 
 
-
 dt = DetectorTester()
-
-# dt.test_on_video(0, 'yolo')
+# dt.test_on_video(0, 'mtcnn')
 dt.prepare_paths()
 for detector in dt.detectors:
     dt.test_on_pictures(detector)
