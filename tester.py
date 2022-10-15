@@ -24,7 +24,7 @@ class DetectorTester:
         self.cv_detector = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
         self.dlib_detector = dlib.get_frontal_face_detector()
         self.mtcnn_detector = MTCNN()
-        self.yolo_detector = YoloDetector(target_size=640, gpu=-1, min_face=90)
+        self.yolo_detector = YoloDetector(target_size=480, gpu=-1, min_face=90)
         self.ultra_face_detector = UltraFace()
 
         self.detectors = {'cv2': self.cv_detect,
@@ -149,7 +149,7 @@ class DetectorTester:
 
 
 dt = DetectorTester()
-# dt.test_on_video(0, 'mtcnn')
-dt.prepare_paths()
-for detector in dt.detectors:
-    dt.test_on_pictures(detector)
+dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'yolo')
+# dt.prepare_paths()
+# for detector in dt.detectors:
+#     dt.test_on_pictures(detector)

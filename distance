@@ -1,0 +1,6 @@
+cv2: 3.25 m
+hog: 3.10 m
+retina: 7.92 m
+mtcnn: 3.26 m
+yolo: 1.03 m
+ultra: 7.45 m
