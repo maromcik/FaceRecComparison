@@ -5,7 +5,7 @@ import dlib
 import random
 from retinaface import RetinaFace
 from mtcnn import MTCNN
-from face_detector import YoloDetector
+from yolov5 import YoloDetector
 from ultraface import UltraFace
 import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -152,6 +152,6 @@ class DetectorTester:
 
 dt = DetectorTester()
 dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'yolo')
-dt.prepare_paths()
-for detector in dt.detectors:
-    dt.test_on_pictures(detector)
+# dt.prepare_paths()
+# for detector in dt.detectors:
+#     dt.test_on_pictures(detector)
