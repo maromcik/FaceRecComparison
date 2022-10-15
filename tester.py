@@ -11,6 +11,7 @@ import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
 import multiprocessing as mp
 
+
 def get_cpu_percent_worker(shared_cpu_samples):
     shared_cpu_samples.append(psutil.cpu_percent(1.8))
 
@@ -151,6 +152,6 @@ class DetectorTester:
 
 dt = DetectorTester()
 dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'yolo')
-# dt.prepare_paths()
-# for detector in dt.detectors:
-#     dt.test_on_pictures(detector)
+dt.prepare_paths()
+for detector in dt.detectors:
+    dt.test_on_pictures(detector)
