@@ -7,6 +7,12 @@ from retinaface import RetinaFace
 from mtcnn import MTCNN
 from face_detector import YoloDetector
 from ultraface import UltraFace
+import psutil
+from apscheduler.schedulers.background import BackgroundScheduler
+import multiprocessing as mp
+
+def get_cpu_percent_worker(shared_cpu_samples):
+    shared_cpu_samples.append(psutil.cpu_percent(1.8))
 
 
 class DetectorTester:
@@ -14,6 +20,7 @@ class DetectorTester:
     def __init__(self):
         self.pictures_path = "data/WIDER_train/images"
         self.folders = os.listdir(self.pictures_path)
+        self.dataset_paths = []
         self.cv_detector = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
         self.dlib_detector = dlib.get_frontal_face_detector()
         self.mtcnn_detector = MTCNN()
@@ -51,7 +58,6 @@ class DetectorTester:
         out = []
         for face in RetinaFace.detect_faces(img).values():
             out.append(face['facial_area'])
-        print(out)
         return out
 
     def mtcnn_detect(self, img):
@@ -73,42 +79,76 @@ class DetectorTester:
         end = time.time()
         return faces, end - start
 
+    def prepare_paths(self):
+        for folder in self.folders:
+            folder_paths = []
+            full_path = self.pictures_path + '/' + folder
+            files = os.listdir(full_path)
+            indices = random.sample(range(0, len(files)), 10)
+            for idx in indices:
+                folder_paths.append(full_path + '/' + files[idx])
+            self.dataset_paths.append(folder_paths)
+
     def prepare_pictures(self, folder):
-        full_path = self.pictures_path + '/' + folder
-        files = os.listdir(full_path)
-        indices = random.sample(range(0, len(files)), 10)
         images = []
-        for idx in indices:
-            images.append(cv2.imread(full_path + '/' + files[idx]))
+        for path in folder:
+            images.append(cv2.imread(path))
         return images
 
     def test_on_video(self, device, detector):
         cap = cv2.VideoCapture(device)
+        total_t = 0
+        i = 0
         while True:
             _, img = cap.read()
             img = self.resize_img(img)
             faces, t = self.detect(img, detector)
+            total_t += t
             for (x, y, w, h) in faces:
                 if detector in ['yolo', 'retina-face', 'ultraface']:
                     cv2.rectangle(img, (x, y), (w, h), (0, 255, 0), 2)
                 else:
                     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-            print(t)
-
             cv2.imshow('img', img)
             k = cv2.waitKey(1) & 0xFF
             if k == 27:
                 break
+            if i >= 100:
+                print(f'average processing time of {detector} over {i} iterations: {total_t / i} s')
+                i = 0
+                total_t = 0
+            i += 1
 
     def test_on_pictures(self, detector):
         total_t = 0
-        for image in self.prepare_pictures(self.folders[0]):
-            faces, t = self.detect(image, detector)
-            print(t)
-            total_t += t
-        print("avg:", total_t / 10)
+        grand_total_t = 0
+        manager = mp.Manager()
+        shared_cpu_samples = manager.list()
+        cpu_watcher = BackgroundScheduler()
+        cpu_watcher.add_job(get_cpu_percent_worker, 'interval', seconds=2, args=(shared_cpu_samples,))
+        cpu_watcher.start()
+        for folder_path in self.dataset_paths:
+            images = self.prepare_pictures(folder_path)
+            for image in images:
+                faces, t = self.detect(image, detector)
+                total_t += t
+            grand_total_t += total_t
+            print(f'avg time of {detector} over {len(images)} images: {total_t / len(images)} s')
+            total_t = 0
+
+        stat_time = f'<{detector}> number of images: {len(self.folders) * 10}, ' \
+                    f'avg time: {grand_total_t / (len(self.folders) * 10)} s, ' \
+                    f'avg cpu usage: {sum(shared_cpu_samples) / len(shared_cpu_samples)}% ({len(shared_cpu_samples)} samples)\n'
+        print(stat_time)
+        with open("stats", 'a') as file:
+            file.write(stat_time)
+
 
 
 dt = DetectorTester()
-dt.test_on_video(0, 'ultraface')
+
+# dt.test_on_video(0, 'yolo')
+dt.prepare_paths()
+for detector in dt.detectors:
+    dt.test_on_pictures(detector)

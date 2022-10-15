@@ -15,32 +15,23 @@ import onnxruntime as ort
 
 class UltraFace:
 
-    def __init__(self, width=320, height=240):
+    def __init__(self, threshold=0.7, width=320, height=240):
         label_path = "models/voc-model-labels.txt"
         self.width = width
         self.height = height
         self.onnx_path = f"models/onnx/version-RFB-{self.width}.onnx"
-
-        self.class_names = [name.strip() for name in open(label_path).readlines()]
-
-        self.predictor = onnx.load(self.onnx_path)
-        onnx.checker.check_model(self.predictor)
-        onnx.helper.printable_graph(self.predictor.graph)
-        self.predictor = backend.prepare(self.predictor, device="CPU")  # default CPU
-
         self.ort_session = ort.InferenceSession(self.onnx_path)
         self.input_name = self.ort_session.get_inputs()[0].name
-        self.threshold = 0.7
-        self.sum = 0
+        self.threshold = threshold
 
-    def predict(self, width, height, confidences, boxes, prob_threshold, iou_threshold=0.3, top_k=-1):
+    def predict(self, width, height, confidences, boxes, iou_threshold=0.3, top_k=-1):
         boxes = boxes[0]
         confidences = confidences[0]
         picked_box_probs = []
         picked_labels = []
         for class_index in range(1, confidences.shape[1]):
             probs = confidences[:, class_index]
-            mask = probs > prob_threshold
+            mask = probs > self.threshold
             probs = probs[mask]
             if probs.shape[0] == 0:
                 continue
@@ -70,6 +61,5 @@ class UltraFace:
         image = np.expand_dims(image, axis=0)
         image = image.astype(np.float32)
         confidences, boxes = self.ort_session.run(None, {self.input_name: image})
-        boxes, labels, probs = self.predict(img.shape[1], img.shape[0], confidences, boxes, self.threshold)
+        boxes, labels, probs = self.predict(img.shape[1], img.shape[0], confidences, boxes)
         return boxes
-
