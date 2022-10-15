@@ -1,7 +1,13 @@
 # Face detector comparison
 
 ## Description
-
+This code was used to test the speed of execution and CPU usage of these face detectors:
+* OpenCV Haar cascade feature-based face detecotr
+* Dlib Histogram of oriented gradients frontal face detector
+* Retina face deeply learned face detector
+* MTCNN deeply learned face detector
+* YOLO deeply learned face detector
+* Ultra ligh fast generic face detector by [Linzaer](https://github.com/Linzaer/Ultra-Light-Fast-Generic-Face-Detector-1MB) for edge devices.
 ## Installation
 ```bash
 pip install -r requirements.txt
