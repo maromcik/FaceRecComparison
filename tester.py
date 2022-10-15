@@ -142,7 +142,8 @@ class DetectorTester:
 
         stat_time = f'<{detector}> number of images: {len(self.folders) * 10}, ' \
                     f'avg time: {grand_total_t / (len(self.folders) * 10)} s, ' \
-                    f'avg cpu usage: {sum(shared_cpu_samples) / len(shared_cpu_samples)}% ({len(shared_cpu_samples)} samples)\n'
+                    f'avg cpu usage: {sum(shared_cpu_samples) / len(shared_cpu_samples)}% ' \
+                    f'({len(shared_cpu_samples)} samples)\n'
         print(stat_time)
         with open("stats", 'a') as file:
             file.write(stat_time)
