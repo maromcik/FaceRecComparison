@@ -5,3 +5,6 @@
 <yolo> number of images: 610, avg time: 0.0656653881072998 s, avg cpu usage: 47.69090909090908% (22 samples)
 <ultraface> number of images: 610, avg time: 0.010302057813425533 s, avg cpu usage: 42.7% (4 samples)
 
+
+<ultraface> number of images: 610, avg time: 0.009854213526991546 s, avg cpu usage: 42.725% (4 samples)
+<ultraface> number of images: 610, avg time: 0.033407789371052724 s, avg cpu usage: 48.63636363636363% (11 samples)

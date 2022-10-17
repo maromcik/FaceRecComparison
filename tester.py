@@ -28,6 +28,8 @@ class DetectorTester:
         self.mtcnn_detector = MTCNN()
         self.yolo_detector = YoloDetector(target_size=480, gpu=-1, min_face=10)
         self.ultra_face_detector = UltraFace()
+        # for RFB 640 model
+        # self.ultra_face_detector = UltraFace(width=640, height=480)
 
         self.detectors = {'cv2': self.cv_detect,
                           'dlib': self.dlib_detect,
@@ -160,6 +162,6 @@ dt = DetectorTester()
 # dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'yolo')
 dt.prepare_paths()
 # dt.test_on_pictures('yolo')
-# dt.test_on_pictures('ultraface')
-for detector in dt.detectors:
-    dt.test_on_pictures(detector)
+dt.test_on_pictures('ultraface')
+# for detector in dt.detectors:
+#     dt.test_on_pictures(detector)
