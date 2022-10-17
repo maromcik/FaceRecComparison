@@ -19,3 +19,5 @@ dlib
 mtcnn
 retina-face
 six
+apscheduler
+psutil
