@@ -5,7 +5,7 @@ joblib==1.0.1
 matplotlib~=3.3.4
 torch==1.10.1
 pandas~=1.1.5
-opencv_python
+opencv-python
 tqdm~=4.64.1
 numpy~=1.19.5
 torchvision==0.11.2
@@ -19,4 +19,3 @@ dlib~=19.24.0
 mtcnn~=0.1.1
 retina-face
 six~=1.15.0
-opencv-python~=4.6.0.66

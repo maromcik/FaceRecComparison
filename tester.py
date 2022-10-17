@@ -12,6 +12,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import multiprocessing as mp
 
 
+
 def get_cpu_percent_worker(shared_cpu_samples):
     shared_cpu_samples.append(psutil.cpu_percent(1.8))
 
@@ -22,14 +23,14 @@ class DetectorTester:
         self.pictures_path = "data/WIDER_train/images"
         self.folders = os.listdir(self.pictures_path)
         self.dataset_paths = []
-        self.cv_detector = cv2.CascadeClassifier('models/haarcascade_frontalface_default.xml')
+        self.cv_detector = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         self.dlib_detector = dlib.get_frontal_face_detector()
         self.mtcnn_detector = MTCNN()
         self.yolo_detector = YoloDetector(target_size=480, gpu=-1, min_face=10)
         self.ultra_face_detector = UltraFace()
 
         self.detectors = {'cv2': self.cv_detect,
-                          'dlib-hog': self.dlib_detect,
+                          'dlib': self.dlib_detect,
                           'retina': self.retina_detect,
                           'mtcnn': self.mtcnn_detect,
                           'yolo': self.yolo_detect,
@@ -150,8 +151,14 @@ class DetectorTester:
             file.write(stat_time)
 
 
+
+class RecognitionTester:
+    def __init__(self):
+        pass
+
 dt = DetectorTester()
-dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'yolo')
-# dt.prepare_paths()
+# dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'yolo')
+dt.prepare_paths()
+dt.test_on_pictures('cv2')
 # for detector in dt.detectors:
 #     dt.test_on_pictures(detector)
