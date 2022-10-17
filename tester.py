@@ -159,6 +159,7 @@ class RecognitionTester:
 dt = DetectorTester()
 # dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'yolo')
 dt.prepare_paths()
-dt.test_on_pictures('cv2')
-# for detector in dt.detectors:
-#     dt.test_on_pictures(detector)
+# dt.test_on_pictures('yolo')
+# dt.test_on_pictures('ultraface')
+for detector in dt.detectors:
+    dt.test_on_pictures(detector)

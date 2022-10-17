@@ -1,6 +1,7 @@
-<cv2> number of images: 610, avg time: 0.5026853264355269 s, avg cpu usage: 6.8638709677419305% (155 samples)
-<dlib-hog> number of images: 610, avg time: 0.28480113490683134 s, avg cpu usage: 6.92954545454545% (88 samples)
-<retina> number of images: 610, avg time: 1.6276445771827073 s, avg cpu usage: 85.85020080321283% (498 samples)
-<mtcnn> number of images: 610, avg time: 0.6562523634707341 s, avg cpu usage: 16.67772277227722% (202 samples)
-<yolo> number of images: 610, avg time: 0.10961777147699575 s, avg cpu usage: 48.525000000000006% (36 samples)
-<ultraface> number of images: 610, avg time: 0.011526059322669858 s, avg cpu usage: 36.6% (5 samples)
+<cv2> number of images: 610, avg time: 0.09121378718829545 s, avg cpu usage: 75.08965517241379% (29 samples)
+<dlib> number of images: 610, avg time: 0.28171098193184274 s, avg cpu usage: 6.6126436781609215% (87 samples)
+<retina> number of images: 610, avg time: 1.7062409334495419 s, avg cpu usage: 86.12509578544062% (522 samples)
+<mtcnn> number of images: 610, avg time: 0.8535379609123606 s, avg cpu usage: 15.868702290076333% (262 samples)
+<yolo> number of images: 610, avg time: 0.0656653881072998 s, avg cpu usage: 47.69090909090908% (22 samples)
+<ultraface> number of images: 610, avg time: 0.010302057813425533 s, avg cpu usage: 42.7% (4 samples)
+
