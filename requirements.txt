@@ -16,3 +16,6 @@ six
 PyYaml
 pandas
 seaborn
+facenet
+arcface
+keras-vggface

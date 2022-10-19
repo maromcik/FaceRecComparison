@@ -3,6 +3,10 @@ import time
 import cv2
 import dlib
 import random
+
+import numpy as np
+from keras.preprocessing import image
+from keras_vggface import utils
 from retinaface import RetinaFace
 from mtcnn import MTCNN
 from yolov5 import YoloDetector
@@ -10,7 +14,9 @@ from ultraface import UltraFace
 import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
 import multiprocessing as mp
-
+from arcface import ArcFace
+from keras_vggface.vggface import VGGFace
+import openface
 
 
 def get_cpu_percent_worker(shared_cpu_samples):
@@ -153,15 +159,98 @@ class DetectorTester:
             file.write(stat_time)
 
 
-
 class RecognitionTester:
     def __init__(self):
-        pass
+        self.arc_face_rec_model = ArcFace.ArcFace()
+        self.dlib_face_rec_model = dlib.face_recognition_model_v1("models/dlib_face_recognition_resnet_model_v1.dat")
+        self.facenet_model = 0
+        self.vgg_model = VGGFace()
+        self.openface_model = openface.TorchNeuralNet("models/openface/nn2.def.lua", 150, cuda=False)
+        self.models = {"dlib": self.dlib_recognize,
+                       "arcface": self.arcface_recognize,
+                       "vgg": self.vgg_recognize,
+                       # "openface": self.openface_recognize,
+                       }
+        print("initialized")
 
-dt = DetectorTester()
-# dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'yolo')
-dt.prepare_paths()
+    # def detect(self, img):
+    #     return self.ultra_face_detector.detect(img)
+    # def to_dlib(self, face):
+    #     return dlib.rectangle(face[0], face[1], face[2], face[3])
+    # def dlib_align(self, image, face):
+    #     # rect = self.to_dlib(face)
+    #     sp = self.shape_predictor(image, face)
+    #     aligned_face = dlib.get_face_chip(image, sp, 150)
+    #     return aligned_face
+
+    def vgg_recognize(self, face):
+        face = cv2.resize(face, (224, 224), interpolation=cv2.INTER_NEAREST)
+        x = np.expand_dims(face, axis=0)
+        x = x.astype('float64')
+        x = utils.preprocess_input(x, version=1)  # or version=2
+        return self.vgg_model.predict(x)
+
+    def arcface_recognize(self, face):
+        return self.arc_face_rec_model.calc_emb(face)
+
+    def dlib_recognize(self, face):
+        return self.dlib_face_rec_model.compute_face_descriptor(face)
+
+    def openface_recognize(self, face):
+        return self.openface_model.forward(face)
+
+    def recognize(self, face, model):
+        start = time.time()
+        self.models[model](face)
+        end = time.time()
+        return end - start
+
+    def test_on_pictures(self, model):
+        path = "data/aligned_faces"
+        faces = []
+        for file in os.listdir(path):
+            faces.append(cv2.imread(path + '/' + file))
+
+        print(len(faces), "faces loaded")
+        total_t = 0
+        count = 0
+        manager = mp.Manager()
+        shared_cpu_samples = manager.list()
+        cpu_watcher = BackgroundScheduler()
+        cpu_watcher.add_job(get_cpu_percent_worker, 'interval', seconds=2.1, args=(shared_cpu_samples,))
+        cpu_watcher.start()
+        for face in faces:
+            t = self.recognize(face, model)
+            total_t += t
+            count += 1
+            print(t)
+
+        stat_time = f'<{model}> number of images: {count}, ' \
+                    f'avg time: {total_t / count} s, ' \
+                    f'avg cpu usage: {sum(shared_cpu_samples) / len(shared_cpu_samples)}% ' \
+                    f'({len(shared_cpu_samples)} samples)\n'
+        print(stat_time)
+        with open("stats_face_rec", 'a') as file:
+            file.write(stat_time)
+
+
+
+# dt = DetectorTester()
+# dt.test_on_video(0, 'yolo')
+# dt.prepare_paths()
 # dt.test_on_pictures('yolo')
-dt.test_on_pictures('ultraface')
+# dt.test_on_pictures('ultraface')
 # for detector in dt.detectors:
 #     dt.test_on_pictures(detector)
+
+
+rt = RecognitionTester()
+for model in rt.models:
+    rt.test_on_pictures(model)
+
+# img = cv2.imread("data/olivia.jpg")
+# faces1 = rt.detect(img)[0]
+# faces2 = rt.dlib_detect(img)[0]
+# print(faces1)
+# print(faces2)
+# print(rt.to_dlib(faces1))
