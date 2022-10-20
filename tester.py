@@ -279,8 +279,8 @@ class ServerLoadTesting:
     def run_test(self):
 
         self.dt.prepare_paths()
-        with mp.Pool(processes=8) as pool:
-            pool.map(self.test_worker, self.dt.dataset_paths)
+        for paths in self.dt.dataset_paths:
+            self.test_worker(paths)
 
 
 # dt = DetectorTester()
@@ -295,13 +295,6 @@ class ServerLoadTesting:
 # rt = RecognitionTester()
 # for model in rt.models:
 #     rt.test_on_pictures(model)
-
-# img = cv2.imread("data/olivia.jpg")
-# faces1 = rt.detect(img)[0]
-# faces2 = rt.dlib_detect(img)[0]
-# print(faces1)
-# print(faces2)
-# print(rt.to_dlib(faces1))
 
 
 slt = ServerLoadTesting()
