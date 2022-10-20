@@ -1,11 +1,11 @@
 import os
+import socket
 import time
 import cv2
 import dlib
 import random
 
 import numpy as np
-from keras.preprocessing import image
 from keras_vggface import utils
 from retinaface import RetinaFace
 from mtcnn import MTCNN
@@ -19,8 +19,8 @@ from keras_vggface.vggface import VGGFace
 import openface
 
 
-def get_cpu_percent_worker(shared_cpu_samples):
-    shared_cpu_samples.append(psutil.cpu_percent(1.8))
+def get_cpu_percent_worker(shared_cpu_samples, interval):
+    shared_cpu_samples.append(psutil.cpu_percent(interval))
 
 
 class DetectorTester:
@@ -139,7 +139,7 @@ class DetectorTester:
         manager = mp.Manager()
         shared_cpu_samples = manager.list()
         cpu_watcher = BackgroundScheduler()
-        cpu_watcher.add_job(get_cpu_percent_worker, 'interval', seconds=2, args=(shared_cpu_samples,))
+        cpu_watcher.add_job(get_cpu_percent_worker, 'interval', seconds=2.2, args=(shared_cpu_samples, 2.0))
         cpu_watcher.start()
         for folder_path in self.dataset_paths:
             images = self.prepare_pictures(folder_path)
@@ -217,7 +217,7 @@ class RecognitionTester:
         manager = mp.Manager()
         shared_cpu_samples = manager.list()
         cpu_watcher = BackgroundScheduler()
-        cpu_watcher.add_job(get_cpu_percent_worker, 'interval', seconds=2.1, args=(shared_cpu_samples,))
+        cpu_watcher.add_job(get_cpu_percent_worker, 'interval', seconds=0.4, args=(shared_cpu_samples, 0.1))
         cpu_watcher.start()
         for face in faces:
             t = self.recognize(face, model)
@@ -225,6 +225,7 @@ class RecognitionTester:
             count += 1
             print(t)
 
+        cpu_watcher.shutdown()
         stat_time = f'<{model}> number of images: {count}, ' \
                     f'avg time: {total_t / count} s, ' \
                     f'avg cpu usage: {sum(shared_cpu_samples) / len(shared_cpu_samples)}% ' \
@@ -232,6 +233,50 @@ class RecognitionTester:
         print(stat_time)
         with open("stats_face_rec", 'a') as file:
             file.write(stat_time)
+
+
+class ServerLoadTesting:
+    def __init__(self):
+
+        self.dt = DetectorTester()
+        self.dt.prepare_paths()
+        self.shape_predictor = dlib.shape_predictor("models/shape_predictor_68_face_landmarks.dat")
+
+    def to_dlib(self, face):
+        return dlib.rectangle(face[0], face[1], face[2], face[3])
+
+    def dlib_align(self, image, face):
+        # rect = self.to_dlib(face)
+        sp = self.shape_predictor(image, face)
+        aligned_face = dlib.get_face_chip(image, sp, 150)
+        return aligned_face
+
+    def encode_image(self, image):
+        img_encode = cv2.imencode('.jpg', image)[1]
+        np_data = np.array(img_encode)
+        byte_data = np_data.tobytes()
+        return byte_data
+
+    def send_image(self, image):
+        camera_id = random.randrange(1, 9)
+        camera = "{:07d}".format(camera_id)
+        c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        c.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        addr = "192.168.80.2", 5555
+        c.connect(addr)
+        c.send(camera.encode())
+        c.sendall(self.encode_image(image))
+
+    def run_test(self):
+        count = 0
+        for folder_path in self.dt.dataset_paths:
+            images = self.dt.prepare_pictures(folder_path)
+            for image in images:
+                faces, t = self.dt.detect(image, 'ultraface')
+                for face in faces:
+                    count += 1
+                    target = self.dlib_align(image, self.to_dlib(face))
+                    self.send_image(target)
 
 
 
@@ -244,9 +289,9 @@ class RecognitionTester:
 #     dt.test_on_pictures(detector)
 
 
-rt = RecognitionTester()
-for model in rt.models:
-    rt.test_on_pictures(model)
+# rt = RecognitionTester()
+# for model in rt.models:
+#     rt.test_on_pictures(model)
 
 # img = cv2.imread("data/olivia.jpg")
 # faces1 = rt.detect(img)[0]
@@ -254,3 +299,7 @@ for model in rt.models:
 # print(faces1)
 # print(faces2)
 # print(rt.to_dlib(faces1))
+
+
+slt = ServerLoadTesting()
+slt.run_test()
