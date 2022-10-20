@@ -262,22 +262,25 @@ class ServerLoadTesting:
         camera = "{:07d}".format(camera_id)
         c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         c.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        addr = "192.168.80.2", 5555
+        addr = "192.168.1.52", 5555
         c.connect(addr)
         c.send(camera.encode())
         c.sendall(self.encode_image(image))
 
-    def run_test(self):
-        count = 0
-        for folder_path in self.dt.dataset_paths:
-            images = self.dt.prepare_pictures(folder_path)
-            for image in images:
-                faces, t = self.dt.detect(image, 'ultraface')
-                for face in faces:
-                    count += 1
-                    target = self.dlib_align(image, self.to_dlib(face))
-                    self.send_image(target)
+    def test_worker(self, paths):
+        images = self.dt.prepare_pictures(paths)
+        for image in images:
+            faces, t = self.dt.detect(image, 'ultraface')
+            for face in faces:
+                target = self.dlib_align(image, self.to_dlib(face))
+                self.send_image(target)
+                print("sent")
 
+    def run_test(self):
+
+        self.dt.prepare_paths()
+        with mp.Pool(processes=8) as pool:
+            pool.map(self.test_worker, self.dt.dataset_paths)
 
 
 # dt = DetectorTester()
@@ -302,4 +305,6 @@ class ServerLoadTesting:
 
 
 slt = ServerLoadTesting()
+start = time.time()
 slt.run_test()
+print("end:", time.time() - start)
