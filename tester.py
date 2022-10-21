@@ -16,7 +16,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import multiprocessing as mp
 from arcface import ArcFace
 from keras_vggface.vggface import VGGFace
-import openface
+
 
 
 def get_cpu_percent_worker(shared_cpu_samples, interval):
@@ -268,19 +268,30 @@ class ServerLoadTesting:
         c.sendall(self.encode_image(image))
 
     def test_worker(self, paths):
+        total_faces = 0
         images = self.dt.prepare_pictures(paths)
         for image in images:
             faces, t = self.dt.detect(image, 'ultraface')
             for face in faces:
+                total_faces += 1
                 target = self.dlib_align(image, self.to_dlib(face))
                 self.send_image(target)
-                print("sent")
+        return total_faces
+
+    def run_test_worker(self, dataset_paths):
+        grand_total_faces = 0
+        for paths in dataset_paths:
+            grand_total_faces += self.test_worker(paths)
+        print("Grand total faces:", grand_total_faces)
 
     def run_test(self):
-
         self.dt.prepare_paths()
-        for paths in self.dt.dataset_paths:
-            self.test_worker(paths)
+        p1 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[:61], ))
+        p2 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[61:], ))
+        p1.start()
+        p2.start()
+        p1.join()
+        p2.join()
 
 
 # dt = DetectorTester()
@@ -297,7 +308,8 @@ class ServerLoadTesting:
 #     rt.test_on_pictures(model)
 
 
-slt = ServerLoadTesting()
-start = time.time()
-slt.run_test()
-print("end:", time.time() - start)
+if __name__ == "__main__":
+    slt = ServerLoadTesting()
+    start = time.time()
+    slt.run_test()
+    print("end:", time.time() - start)
