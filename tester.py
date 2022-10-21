@@ -165,7 +165,7 @@ class RecognitionTester:
         self.dlib_face_rec_model = dlib.face_recognition_model_v1("models/dlib_face_recognition_resnet_model_v1.dat")
         self.facenet_model = 0
         self.vgg_model = VGGFace()
-        self.openface_model = openface.TorchNeuralNet("models/openface/nn2.def.lua", 150, cuda=False)
+        # self.openface_model = openface.TorchNeuralNet("models/openface/nn2.def.lua", 150, cuda=False)
         self.models = {"dlib": self.dlib_recognize,
                        "arcface": self.arcface_recognize,
                        "vgg": self.vgg_recognize,
@@ -294,22 +294,24 @@ class ServerLoadTesting:
         p2.join()
 
 
-# dt = DetectorTester()
-# dt.test_on_video(0, 'yolo')
-# dt.prepare_paths()
-# dt.test_on_pictures('yolo')
-# dt.test_on_pictures('ultraface')
-# for detector in dt.detectors:
-#     dt.test_on_pictures(detector)
-
-
-# rt = RecognitionTester()
-# for model in rt.models:
-#     rt.test_on_pictures(model)
-
-
 if __name__ == "__main__":
-    slt = ServerLoadTesting()
-    start = time.time()
-    slt.run_test()
-    print("end:", time.time() - start)
+
+    dt = DetectorTester()
+    # dt.test_on_video(0, 'yolo')
+    dt.prepare_paths()
+    # dt.test_on_pictures('yolo')
+    dt.test_on_pictures('ultraface')
+    # for detector in dt.detectors:
+    #     dt.test_on_pictures(detector)
+
+
+    # rt = RecognitionTester()
+    # for model in rt.models:
+    #     rt.test_on_pictures(model)
+
+
+
+    # slt = ServerLoadTesting()
+    # start = time.time()
+    # slt.run_test()
+    # print("end:", time.time() - start)
