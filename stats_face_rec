@@ -1,3 +1,6 @@
 <dlib> number of images: 100, avg time: 0.0344874906539917 s, avg cpu usage: 99.79999999999998% (7 samples)
 <arcface> number of images: 100, avg time: 0.057348911762237546 s, avg cpu usage: 7.728571428571429% (14 samples)
 <vgg> number of images: 100, avg time: 0.16109350204467773 s, avg cpu usage: 50.4225% (40 samples)
+<dlib> number of images: 100, avg time: 0.039152207374572756 s, avg cpu usage: 100.0% (8 samples)
+<arcface> number of images: 100, avg time: 0.05445284605026245 s, avg cpu usage: 12.938461538461537% (13 samples)
+<vgg> number of images: 100, avg time: 0.16296884536743164 s, avg cpu usage: 51.697500000000005% (40 samples)
