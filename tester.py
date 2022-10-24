@@ -31,11 +31,11 @@ class DetectorTester:
         self.dataset_paths = []
         self.cv_detector = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
         self.dlib_detector = dlib.get_frontal_face_detector()
-        self.mtcnn_detector = MTCNN()
+        self.mtcnn_detector = MTCNN(min_face_size=10)
         self.yolo_detector = YoloDetector(target_size=480, gpu=-1, min_face=10)
-        self.ultra_face_detector = UltraFace()
+        # self.ultra_face_detector = UltraFace()
         # for RFB 640 model
-        # self.ultra_face_detector = UltraFace(width=640, height=480)
+        self.ultra_face_detector = UltraFace(width=640, height=480)
 
         self.detectors = {'cv2': self.cv_detect,
                           'dlib': self.dlib_detect,
@@ -258,7 +258,7 @@ class ServerLoadTesting:
         return byte_data
 
     def send_image(self, image):
-        camera_id = random.randrange(1, 9)
+        camera_id = random.randrange(1, 6)
         camera = "{:07d}".format(camera_id)
         c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         c.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -285,29 +285,29 @@ class ServerLoadTesting:
         print("Grand total faces:", grand_total_faces)
 
     def run_test(self):
-        self.dt.prepare_paths()
-        p1 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[:61], ))
-        p2 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[61:], ))
+        # self.dt.prepare_paths()
+        p1 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths, ))
+        # p2 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[61:], ))
         p1.start()
-        p2.start()
+        # p2.start()
         p1.join()
-        p2.join()
+        # p2.join()
 
 
 if __name__ == "__main__":
 
-    dt = DetectorTester()
-    # dt.test_on_video(0, 'yolo')
-    dt.prepare_paths()
-    # dt.test_on_pictures('yolo')
-    dt.test_on_pictures('ultraface')
+    # dt = DetectorTester()
+    # dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'ultraface')
+    # dt.prepare_paths()
+    # dt.test_on_pictures('MTCNN')
+    # dt.test_on_pictures('ultraface')
     # for detector in dt.detectors:
     #     dt.test_on_pictures(detector)
 
 
-    # rt = RecognitionTester()
-    # for model in rt.models:
-    #     rt.test_on_pictures(model)
+    rt = RecognitionTester()
+    for model in rt.models:
+        rt.test_on_pictures(model)
 
 
 

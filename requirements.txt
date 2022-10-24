@@ -19,3 +19,5 @@ seaborn
 facenet
 arcface
 keras-vggface
+keras_applications
+astropy
