@@ -286,12 +286,12 @@ class ServerLoadTesting:
 
     def run_test(self):
         # self.dt.prepare_paths()
-        p1 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths, ))
-        # p2 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[61:], ))
+        p1 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[:30], ))
+        p2 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[31:], ))
         p1.start()
-        # p2.start()
+        p2.start()
         p1.join()
-        # p2.join()
+        p2.join()
 
 
 if __name__ == "__main__":
@@ -305,13 +305,13 @@ if __name__ == "__main__":
     #     dt.test_on_pictures(detector)
 
 
-    rt = RecognitionTester()
-    for model in rt.models:
-        rt.test_on_pictures(model)
+    # rt = RecognitionTester()
+    # for model in rt.models:
+    #     rt.test_on_pictures(model)
 
 
 
-    # slt = ServerLoadTesting()
-    # start = time.time()
-    # slt.run_test()
-    # print("end:", time.time() - start)
+    slt = ServerLoadTesting()
+    start = time.time()
+    slt.run_test()
+    print("end:", time.time() - start)
