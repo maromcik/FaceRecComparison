@@ -18,7 +18,6 @@ from arcface import ArcFace
 from keras_vggface.vggface import VGGFace
 
 
-
 def get_cpu_percent_worker(shared_cpu_samples, interval):
     shared_cpu_samples.append(psutil.cpu_percent(interval))
 
@@ -241,6 +240,7 @@ class ServerLoadTesting:
         self.dt = DetectorTester()
         self.dt.prepare_paths()
         self.shape_predictor = dlib.shape_predictor("models/shape_predictor_68_face_landmarks.dat")
+        self.faces = []
 
     def to_dlib(self, face):
         return dlib.rectangle(face[0], face[1], face[2], face[3])
@@ -258,60 +258,63 @@ class ServerLoadTesting:
         return byte_data
 
     def send_image(self, image):
-        camera_id = random.randrange(1, 6)
+        camera_id = random.randrange(3, 8)
         camera = "{:07d}".format(camera_id)
         c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         c.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        addr = "192.168.1.52", 5555
+        addr = "127.0.0.1", 5555
         c.connect(addr)
         c.send(camera.encode())
         c.sendall(self.encode_image(image))
 
-    def test_worker(self, paths):
-        total_faces = 0
+    def prepare_paths(self, paths):
         images = self.dt.prepare_pictures(paths)
         for image in images:
             faces, t = self.dt.detect(image, 'ultraface')
             for face in faces:
-                total_faces += 1
                 target = self.dlib_align(image, self.to_dlib(face))
-                self.send_image(target)
-        return total_faces
+                self.faces.append(target)
 
-    def run_test_worker(self, dataset_paths):
-        grand_total_faces = 0
-        for paths in dataset_paths:
-            grand_total_faces += self.test_worker(paths)
-        print("Grand total faces:", grand_total_faces)
+    def prepare_aligned_faces(self):
+        path = "data/aligned_faces"
+        for file in os.listdir(path):
+            self.faces.append(cv2.imread(path + '/' + file))
+
+        print(len(self.faces), "faces loaded")
+
+    def prepare_faces(self):
+        for paths in self.dt.dataset_paths:
+            self.prepare_paths(paths)
+        print("the number of faces:", len(self.faces))
+
+    def run_test_worker(self, faces):
+        for face in faces:
+            self.send_image(face)
 
     def run_test(self):
-        # self.dt.prepare_paths()
-        p1 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[:30], ))
-        p2 = mp.Process(target=self.run_test_worker, args=(self.dt.dataset_paths[31:], ))
+        # self.prepare_faces()
+        self.prepare_aligned_faces()
+        n_faces = len(self.faces)
+        print("Sending")
+        p1 = mp.Process(target=self.run_test_worker, args=(self.faces[:(n_faces // 2)],))
+        p2 = mp.Process(target=self.run_test_worker, args=(self.faces[(n_faces // 2):],))
         p1.start()
         p2.start()
         p1.join()
         p2.join()
+        print("Finished")
 
 
 if __name__ == "__main__":
+    dt = DetectorTester()
+    dt.prepare_paths()
+    for detector in dt.detectors:
+        dt.test_on_pictures(detector)
 
-    # dt = DetectorTester()
-    # dt.test_on_video("rtmp://192.168.5.51:1935/livemain", 'ultraface')
-    # dt.prepare_paths()
-    # dt.test_on_pictures('MTCNN')
-    # dt.test_on_pictures('ultraface')
-    # for detector in dt.detectors:
-    #     dt.test_on_pictures(detector)
-
-
-    # rt = RecognitionTester()
-    # for model in rt.models:
-    #     rt.test_on_pictures(model)
-
-
+    rt = RecognitionTester()
+    for model in rt.models:
+        rt.test_on_pictures(model)
 
     slt = ServerLoadTesting()
     start = time.time()
     slt.run_test()
-    print("end:", time.time() - start)
