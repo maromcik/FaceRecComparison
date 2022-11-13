@@ -11,3 +11,8 @@
 <dlib> number of images: 100, avg time: 0.07614242792129516 s, avg cpu usage: 10.885714285714284% (7 samples)
 <dlib> number of images: 100, avg time: 0.08322046756744385 s, avg cpu usage: 13.857142857142858% (7 samples)
 <dlib> number of images: 100, avg time: 0.09746018409729004 s, avg cpu usage: 99.9% (22 samples)
+<dlib> number of images: 100, avg time: 0.04012183904647827 s, avg cpu usage: 99.39% (10 samples)
+<dlib> number of images: 100, avg time: 0.04077190637588501 s, avg cpu usage: 99.32000000000001% (10 samples)
+<dlib> number of images: 100, avg time: 0.049851405620574954 s, avg cpu usage: 99.81818181818181% (11 samples)
+<dlib> number of images: 100, avg time: 0.046542656421661374 s, avg cpu usage: 99.7125% (8 samples)
+<dlib> number of images: 100, avg time: 0.07001006364822387 s, avg cpu usage: 99.6625% (16 samples)

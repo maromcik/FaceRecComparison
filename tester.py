@@ -306,15 +306,16 @@ class ServerLoadTesting:
 
 
 if __name__ == "__main__":
-    dt = DetectorTester()
-    dt.prepare_paths()
-    for detector in dt.detectors:
-        dt.test_on_pictures(detector)
+    # dt = DetectorTester()
+    # dt.prepare_paths()
+    # for detector in dt.detectors:
+    #     dt.test_on_pictures(detector)
 
     rt = RecognitionTester()
-    for model in rt.models:
-        rt.test_on_pictures(model)
+    rt.test_on_pictures('dlib')
+    # for model in rt.models:
+    #     rt.test_on_pictures(model)
 
-    slt = ServerLoadTesting()
-    start = time.time()
-    slt.run_test()
+    # slt = ServerLoadTesting()
+    # start = time.time()
+    # slt.run_test()

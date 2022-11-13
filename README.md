@@ -1,4 +1,4 @@
-# Face detector comparison
+# Fa# apt-get install virt-manager (Debian)ce detector comparison
 
 ## Description
 This code was used to test the speed of execution and CPU usage of these face detectors:
