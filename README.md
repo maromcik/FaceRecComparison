@@ -1,8 +1,10 @@
-# Fa# apt-get install virt-manager (Debian)ce detector comparison
+# Testing framework
 
-## Description
+## Face detectors
+
+### Description
 This code was used to test the speed of execution and CPU usage of these face detectors:
-* OpenCV Haar cascade feature-based face detecotr
+* OpenCV Haar cascade feature-based face detector
 * Dlib Histogram of oriented gradients frontal face detector
 * Retina face deeply learned face detector
 * MTCNN deeply learned face detector
@@ -12,7 +14,7 @@ This code was used to test the speed of execution and CPU usage of these face de
 ```bash
 pip install -r requirements.txt
 ```
-## Usage example
+### Usage example
 Running on a video stream from an IP camera.
 ```python
 from tester import DetectorTester
@@ -33,3 +35,7 @@ dt.prepare_paths()
 for detector in dt.detectors:
     dt.test_on_pictures(detector)
 ```
+
+## Face recognition models
+
+## System testing
