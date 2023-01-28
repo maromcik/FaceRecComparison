@@ -21,6 +21,9 @@ from utils.general import check_img_size, non_max_suppression_face, \
 class YoloDetector:
     def __init__(self, weights_name='yolov5n_state_dict.pt', config_name='yolov5n.yaml', gpu=0, min_face=100,
                  target_size=None, frontal=False):
+        print("YOLO scheduling")
+        show = f"chrt -p {os.getpid()}"
+        os.system(show)
         """
         weights_name: name of file with network weights in weights/ folder.
         config_name: name of .yaml config with network configuration from models/ folder.

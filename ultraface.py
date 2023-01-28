@@ -1,6 +1,8 @@
 """
 This code uses the onnx model to detect faces from live video or cameras.
 """
+import os
+import subprocess
 import time
 
 import cv2
@@ -14,6 +16,10 @@ import onnxruntime as ort
 class UltraFace:
 
     def __init__(self, threshold=0.7, width=320, height=240):
+        print("ULFG scheduling")
+        show = f"chrt -p {os.getpid()}"
+        os.system(show)
+
         label_path = "models/voc-model-labels.txt"
         self.width = width
         self.height = height

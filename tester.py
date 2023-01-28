@@ -1,11 +1,20 @@
 import os
+import time
+
+main_pid = os.getpid()
+print("pid:", main_pid)
+
+command = 'echo maromcik24 | sudo -S chrt -a -b -p 0 '
+os.system(command + str(main_pid))
+
+show = "chrt -p "
+os.system(show + str(main_pid))
+
 import pickle
 import socket
-import time
 import cv2
 import dlib
 import random
-
 import numpy as np
 from keras_vggface import utils
 from retinaface import RetinaFace
@@ -311,8 +320,11 @@ class ServerLoadTesting:
 
 
 if __name__ == "__main__":
-    # dt = DetectorTester()
-    # dt.prepare_paths()
+    dt = DetectorTester()
+    dt.prepare_paths()
+    dt.test_on_pictures("ultraface")
+    dt.test_on_pictures("yolo")
+
     # for detector in dt.detectors:
     #     dt.test_on_pictures(detector)
     #
@@ -321,9 +333,9 @@ if __name__ == "__main__":
     # for model in rt.models:
     #     rt.test_on_pictures(model)
 
-    slt = ServerLoadTesting()
+    # slt = ServerLoadTesting()
     # slt.prepare_faces()
-    slt.load_faces()
-    start = time.time()
-    slt.run_test()
-    print("time:", time.time() - start)
+    # slt.load_faces()
+    # start = time.time()
+    # slt.run_test()
+    # print("time:", time.time() - start)
